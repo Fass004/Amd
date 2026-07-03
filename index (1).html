@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SU TII YARA ONG — Semer aujourd'hui, nourrir demain</title>
+<meta name="description" content="SU TII YARA ONG — organisation béninoise engagée pour le développement rural durable, l'autonomisation des communautés et la protection de l'environnement à N'Dali, Bénin.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --forest:#1B3A2B;
+    --forest-deep:#122A1F;
+    --gold:#C9A24B;
+    --gold-light:#E4C77A;
+    --cream:#FAF6EE;
+    --terracotta:#A85C32;
+    --charcoal:#2A2A24;
+    --line: rgba(201,162,75,0.35);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--cream);
+    color:var(--charcoal);
+    font-family:'Inter', sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.display{
+    font-family:'Fraunces', serif;
+    font-weight:500;
+    letter-spacing:-0.01em;
+    color:var(--forest-deep);
+  }
+  a{color:inherit; text-decoration:none;}
+  img,svg{max-width:100%; display:block;}
+  button{font-family:inherit; cursor:pointer;}
+  .wrap{max-width:1140px; margin:0 auto; padding:0 28px;}
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    font-size:0.72rem;
+    font-weight:600;
+    color:var(--terracotta);
+  }
+
+  /* ---------- growth progress indicator (signature element) ---------- */
+  #growth-rail{
+    position:fixed; left:18px; top:50%; transform:translateY(-50%);
+    width:3px; height:220px; z-index:60;
+    background:rgba(201,162,75,0.18);
+    border-radius:3px;
+    display:flex; align-items:flex-end;
+  }
+  #growth-fill{
+    width:100%; height:0%;
+    background:linear-gradient(to top, var(--forest), var(--gold-light));
+    border-radius:3px;
+    transition:height 0.1s linear;
+    position:relative;
+  }
+  #growth-fill::after{
+    content:"🌱";
+    position:absolute; top:-14px; left:50%; transform:translateX(-50%);
+    font-size:0.85rem;
+  }
+  @media (max-width: 860px){ #growth-rail{display:none;} }
+
+  /* ---------- reveal on scroll ---------- */
+  .reveal{opacity:0; transform:translateY(28px); transition:opacity 0.7s ease, transform 0.7s ease;}
+  .reveal.in-view{opacity:1; transform:translateY(0);}
+  .reveal-stagger > *{opacity:0; transform:translateY(24px); transition:opacity 0.6s ease, transform 0.6s ease;}
+  .reveal-stagger.in-view > *{opacity:1; transform:translateY(0);}
+  .reveal-stagger.in-view > *:nth-child(1){transition-delay:0.05s;}
+  .reveal-stagger.in-view > *:nth-child(2){transition-delay:0.12s;}
+  .reveal-stagger.in-view > *:nth-child(3){transition-delay:0.19s;}
+  .reveal-stagger.in-view > *:nth-child(4){transition-delay:0.26s;}
+  .reveal-stagger.in-view > *:nth-child(5){transition-delay:0.33s;}
+
+  /* ---------- header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(250,246,238,0.92);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 28px;
+    max-width:1140px; margin:0 auto;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{
+    width:42px; height:42px; border-radius:50%;
+    border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif; font-weight:600; color:var(--forest);
+    font-size:1rem;
+  }
+  .brand-name{font-family:'Fraunces', serif; font-weight:600; font-size:1.15rem; color:var(--forest-deep); line-height:1;}
+  .brand-name span{display:block; font-family:'Inter',sans-serif; font-weight:500; font-size:0.62rem; letter-spacing:0.16em; color:var(--terracotta); margin-top:3px;}
+  nav ul{list-style:none; display:flex; gap:26px; align-items:center;}
+  nav ul li a{font-size:0.88rem; font-weight:500; color:var(--charcoal); transition:color 0.2s;}
+  nav ul li a:hover{color:var(--terracotta);}
+  .nav-right{display:flex; align-items:center; gap:14px;}
+  .lang-toggle{
+    border:1px solid var(--line); background:none; border-radius:20px;
+    padding:6px 4px; font-size:0.72rem; font-weight:600; color:var(--forest-deep);
+    display:flex; gap:2px;
+  }
+  .lang-toggle button{
+    border:none; background:none; padding:4px 10px; border-radius:16px; font-size:0.72rem; font-weight:600; color:var(--charcoal);
+  }
+  .lang-toggle button.active{background:var(--forest); color:var(--cream);}
+  .nav-cta{
+    background:var(--forest); color:var(--cream);
+    padding:10px 20px; border-radius:2px;
+    font-size:0.83rem; font-weight:600; letter-spacing:0.02em;
+    transition:background 0.2s;
+  }
+  .nav-cta:hover{background:var(--forest-deep);}
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    padding:100px 28px 60px;
+    text-align:center;
+    overflow:hidden;
+  }
+  .hero-illustration{
+    max-width:920px; margin:0 auto -40px; position:relative; z-index:1;
+  }
+  .hero-inner{position:relative; z-index:2; max-width:760px; margin:0 auto;}
+  .hero .eyebrow{display:block; margin-bottom:18px; opacity:0; animation:fadeUp 0.8s ease forwards 0.1s;}
+  .hero h1{
+    font-size:clamp(2.2rem, 5vw, 3.6rem);
+    line-height:1.1;
+    margin-bottom:22px;
+    opacity:0; animation:fadeUp 0.8s ease forwards 0.25s;
+  }
+  .hero h1 em{ font-style:italic; color:var(--terracotta); }
+  .hero p.lead{
+    font-size:1.1rem; color:#4b4b40; max-width:560px; margin:0 auto 36px;
+    opacity:0; animation:fadeUp 0.8s ease forwards 0.4s;
+  }
+  .cta-row{display:flex; gap:16px; justify-content:center; flex-wrap:wrap; opacity:0; animation:fadeUp 0.8s ease forwards 0.55s;}
+  @keyframes fadeUp{ from{opacity:0; transform:translateY(18px);} to{opacity:1; transform:translateY(0);} }
+  @media (prefers-reduced-motion: reduce){
+    .hero .eyebrow,.hero h1,.hero p.lead,.cta-row{animation:none; opacity:1;}
+  }
+  .btn{
+    display:inline-block; padding:14px 30px; border-radius:2px;
+    font-weight:600; font-size:0.92rem; letter-spacing:0.02em;
+    transition:transform 0.2s, background 0.2s, box-shadow 0.2s;
+    border:1.5px solid transparent;
+  }
+  .btn-primary{background:var(--forest); color:var(--cream);}
+  .btn-primary:hover{background:var(--forest-deep); transform:translateY(-2px); box-shadow:0 8px 20px rgba(27,58,43,0.25);}
+  .btn-outline{border-color:var(--forest); color:var(--forest-deep);}
+  .btn-outline:hover{background:var(--forest); color:var(--cream); transform:translateY(-2px);}
+  .btn-gold{background:var(--gold); color:var(--forest-deep);}
+  .btn-gold:hover{background:var(--gold-light); transform:translateY(-2px); box-shadow:0 8px 20px rgba(201,162,75,0.35);}
+
+  /* ---------- stats ---------- */
+  .stats{ background:var(--forest-deep); color:var(--cream); padding:50px 28px; }
+  .stats-grid{
+    max-width:1140px; margin:0 auto;
+    display:grid; grid-template-columns:repeat(4,1fr); gap:24px; text-align:center;
+  }
+  .stat-num{font-family:'Fraunces',serif; font-size:2.4rem; color:var(--gold-light); font-weight:500;}
+  .stat-label{font-size:0.8rem; opacity:0.75; margin-top:4px; letter-spacing:0.03em;}
+
+  /* ---------- section shell ---------- */
+  section{position:relative; padding:100px 28px;}
+  .section-head{max-width:640px; margin:0 auto 56px; text-align:center;}
+  .section-head h2{font-size:clamp(1.8rem,3.4vw,2.5rem); margin-top:14px;}
+  .section-head p{color:#5c5c50; margin-top:14px; font-size:1.02rem;}
+
+  /* ---------- qui sommes-nous / mission ---------- */
+  .two-col{
+    max-width:1140px; margin:0 auto;
+    display:grid; grid-template-columns:1fr 1fr; gap:70px; align-items:start;
+  }
+  .story-block{border-left:2px solid var(--gold); padding-left:28px;}
+  .story-block h3{font-size:1.4rem; margin-bottom:12px;}
+  .story-block p{color:#4b4b40;}
+  .story-block + .story-block{margin-top:52px;}
+
+  /* ---------- timeline ---------- */
+  .timeline{max-width:760px; margin:0 auto; position:relative; padding-left:36px;}
+  .timeline::before{content:""; position:absolute; left:6px; top:6px; bottom:6px; width:2px; background:var(--line);}
+  .tl-item{position:relative; padding-bottom:44px;}
+  .tl-item:last-child{padding-bottom:0;}
+  .tl-item::before{
+    content:""; position:absolute; left:-36px; top:2px; width:14px; height:14px; border-radius:50%;
+    background:var(--gold); border:3px solid var(--cream); box-shadow:0 0 0 1.5px var(--gold);
+  }
+  .tl-year{font-family:'Fraunces',serif; color:var(--terracotta); font-weight:600; font-size:1.05rem; margin-bottom:4px;}
+  .tl-item p{color:#4b4b40; font-size:0.95rem;}
+
+  /* ---------- domaines ---------- */
+  .pillars{ max-width:1140px; margin:0 auto; display:grid; grid-template-columns:repeat(5,1fr); gap:20px; }
+  .pillar-card{
+    background:#fff; border:1px solid var(--line); padding:30px 20px; text-align:center;
+    border-radius:3px; transition:transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+  }
+  .pillar-card:hover{ transform:translateY(-6px); box-shadow:0 16px 30px rgba(27,58,43,0.12); border-color:var(--gold); }
+  .pillar-icon{
+    width:52px; height:52px; margin:0 auto 18px; border-radius:50%; background:var(--forest);
+    display:flex; align-items:center; justify-content:center; color:var(--gold-light); font-size:1.4rem;
+  }
+  .pillar-card h4{font-family:'Fraunces',serif; font-size:1rem; font-weight:600; color:var(--forest-deep); margin-bottom:10px;}
+  .pillar-card p{font-size:0.85rem; color:#5c5c50;}
+
+  /* ---------- galerie ---------- */
+  .gallery-grid{
+    max-width:1140px; margin:0 auto;
+    display:grid; grid-template-columns:repeat(4,1fr); grid-auto-rows:160px; gap:14px;
+  }
+  .gallery-item{
+    border-radius:4px; position:relative; overflow:hidden;
+    display:flex; align-items:flex-end; padding:16px;
+    color:var(--cream); font-size:0.8rem; font-weight:600;
+    transition:transform 0.35s ease;
+  }
+  .gallery-item:hover{transform:scale(1.03);}
+  .gallery-item span{position:relative; z-index:2;}
+  .gallery-item::after{content:""; position:absolute; inset:0; background:linear-gradient(to top, rgba(18,42,31,0.75), transparent 60%);}
+  .gallery-item.tall{grid-row:span 2;}
+  .g1{background:linear-gradient(135deg,#2d5a41,#1B3A2B);}
+  .g2{background:linear-gradient(135deg,#C9A24B,#A85C32);}
+  .g3{background:linear-gradient(135deg,#1B3A2B,#0d1f16);}
+  .g4{background:linear-gradient(135deg,#A85C32,#7a3f1f);}
+  .g5{background:linear-gradient(135deg,#3d6b4f,#1B3A2B);}
+  .g6{background:linear-gradient(135deg,#E4C77A,#C9A24B);}
+  .gallery-note{max-width:1140px; margin:20px auto 0; font-size:0.8rem; color:#8a8a7c; text-align:center;}
+
+  /* ---------- valeurs ---------- */
+  .values-section{background:var(--forest-deep); color:var(--cream);}
+  .values-section .section-head h2{color:var(--cream);}
+  .values-section .eyebrow{color:var(--gold-light);}
+  .values-section .section-head p{color:rgba(250,246,238,0.7);}
+  .values-grid{ max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:2px; background:rgba(250,246,238,0.15); }
+  .value-item{ background:var(--forest-deep); padding:34px 24px; text-align:center; }
+  .value-item .mark{color:var(--gold-light); font-size:1.3rem; margin-bottom:10px; display:block;}
+  .value-item span.label{font-weight:600; font-size:0.95rem;}
+
+  /* ---------- témoignages ---------- */
+  .testimonial-wrap{max-width:760px; margin:0 auto; position:relative;}
+  .testimonial{ display:none; text-align:center; }
+  .testimonial.active{display:block;}
+  .testimonial blockquote{font-family:'Fraunces',serif; font-size:1.35rem; font-style:italic; color:var(--forest-deep); line-height:1.5; margin-bottom:24px;}
+  .testimonial-author{display:flex; align-items:center; justify-content:center; gap:12px;}
+  .avatar{width:44px; height:44px; border-radius:50%; background:var(--gold); color:var(--forest-deep); display:flex; align-items:center; justify-content:center; font-weight:600; font-family:'Fraunces',serif;}
+  .testimonial-author .who{text-align:left;}
+  .testimonial-author .who strong{display:block; font-size:0.9rem;}
+  .testimonial-author .who span{font-size:0.78rem; color:#8a8a7c;}
+  .testi-dots{display:flex; justify-content:center; gap:8px; margin-top:32px;}
+  .testi-dots button{width:8px; height:8px; border-radius:50%; border:none; background:var(--line); padding:0;}
+  .testi-dots button.active{background:var(--terracotta); width:22px; border-radius:4px;}
+
+  /* ---------- partenariat ---------- */
+  .partner{
+    max-width:900px; margin:0 auto; background:#fff; border:1px solid var(--line); border-radius:4px;
+    padding:48px; display:flex; align-items:center; gap:36px; flex-wrap:wrap;
+  }
+  .partner-badge{
+    width:76px; height:76px; border-radius:50%; border:2px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:600; color:var(--forest); font-size:0.8rem;
+    text-align:center; flex-shrink:0;
+  }
+  .partner-text h3{font-size:1.25rem; margin-bottom:8px;}
+  .partner-text p{color:#5c5c50; font-size:0.95rem;}
+
+  /* ---------- don ---------- */
+  .donate-section{background:#fff; border-top:1px solid var(--line); border-bottom:1px solid var(--line);}
+  .donate-box{max-width:640px; margin:0 auto; background:var(--cream); border:1px solid var(--line); border-radius:6px; padding:44px;}
+  .amount-row{display:flex; gap:10px; flex-wrap:wrap; margin:20px 0;}
+  .amount-btn{
+    flex:1; min-width:90px; padding:14px; border:1.5px solid var(--line); background:#fff; border-radius:3px;
+    font-weight:600; color:var(--forest-deep); transition:all 0.2s;
+  }
+  .amount-btn.active, .amount-btn:hover{border-color:var(--gold); background:var(--gold); color:var(--forest-deep);}
+  .field{margin-bottom:18px;}
+  .field label{display:block; font-size:0.82rem; font-weight:600; margin-bottom:6px; color:var(--forest-deep);}
+  .field input, .field select{
+    width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:3px; font-family:inherit; font-size:0.92rem; background:#fff;
+  }
+  .field input:focus, .field select:focus{outline:2px solid var(--gold); outline-offset:1px;}
+
+  /* ---------- carte ---------- */
+  .map-wrap{max-width:1140px; margin:0 auto; border-radius:6px; overflow:hidden; border:1px solid var(--line);}
+  .map-wrap iframe{width:100%; height:380px; border:0; display:block;}
+
+  /* ---------- membres teaser ---------- */
+  .members{ background:linear-gradient(135deg, var(--forest) 0%, var(--forest-deep) 100%); color:var(--cream); text-align:center; }
+  .members .section-head h2{color:var(--cream);}
+  .members .section-head p{color:rgba(250,246,238,0.75);}
+  .member-cards{max-width:960px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:20px;}
+  .member-card{background:rgba(250,246,238,0.06); border:1px solid rgba(250,246,238,0.18); border-radius:3px; padding:30px 22px; text-align:left;}
+  .member-card .eyebrow{color:var(--gold-light);}
+  .member-card h4{font-family:'Fraunces',serif; font-size:1.05rem; margin:10px 0 10px; color:var(--cream);}
+  .member-card p{font-size:0.85rem; color:rgba(250,246,238,0.7);}
+
+  /* ---------- contact avancé ---------- */
+  .contact-grid{max-width:1140px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:60px;}
+  .contact-form .field{margin-bottom:16px;}
+  .contact-form textarea{width:100%; padding:12px 14px; border:1px solid var(--line); border-radius:3px; font-family:inherit; font-size:0.92rem; min-height:120px; resize:vertical;}
+  .contact-info-list{list-style:none;}
+  .contact-info-list li{display:flex; gap:14px; margin-bottom:22px; align-items:flex-start;}
+  .contact-info-list .ic{width:38px; height:38px; border-radius:50%; background:var(--forest); color:var(--gold-light); display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:1rem;}
+  .contact-info-list strong{display:block; font-size:0.9rem; color:var(--forest-deep);}
+  .contact-info-list span{font-size:0.85rem; color:#5c5c50;}
+
+  /* ---------- footer ---------- */
+  footer{ background:var(--charcoal); color:rgba(250,246,238,0.85); padding:70px 28px 30px; }
+  .footer-grid{
+    max-width:1140px; margin:0 auto; display:grid; grid-template-columns:1.4fr 1fr 1fr; gap:50px;
+    padding-bottom:40px; border-bottom:1px solid rgba(250,246,238,0.12);
+  }
+  .footer-grid h4{font-family:'Fraunces',serif; color:var(--gold-light); font-size:1rem; margin-bottom:18px;}
+  .footer-grid p, .footer-grid a{font-size:0.9rem; color:rgba(250,246,238,0.7); display:block; margin-bottom:10px;}
+  .footer-grid a:hover{color:var(--gold-light);}
+  .foot-bottom{
+    max-width:1140px; margin:0 auto; padding-top:24px; display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+    font-size:0.78rem; color:rgba(250,246,238,0.45);
+  }
+
+  /* ---------- responsive ---------- */
+  @media (max-width: 860px){
+    nav ul{display:none;}
+    .two-col{grid-template-columns:1fr; gap:40px;}
+    .pillars{grid-template-columns:repeat(2,1fr);}
+    .stats-grid{grid-template-columns:repeat(2,1fr); gap:32px;}
+    .values-grid{grid-template-columns:1fr;}
+    .member-cards{grid-template-columns:1fr;}
+    .footer-grid{grid-template-columns:1fr; gap:30px;}
+    .gallery-grid{grid-template-columns:repeat(2,1fr); grid-auto-rows:130px;}
+    .contact-grid{grid-template-columns:1fr; gap:40px;}
+    section{padding:70px 20px;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{transition:none !important; scroll-behavior:auto !important; animation:none !important;}
+    .reveal, .reveal-stagger > *{opacity:1 !important; transform:none !important;}
+  }
+</style>
+</head>
+<body>
+
+<div id="growth-rail" aria-hidden="true"><div id="growth-fill"></div></div>
+
+<header>
+  <div class="nav">
+    <div class="brand">
+      <div class="brand-mark">STY</div>
+      <div class="brand-name">SU TII YARA<span>ONG · N'DALI, BÉNIN</span></div>
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#mission" data-i18n="nav_mission">Mission</a></li>
+        <li><a href="#domaines" data-i18n="nav_domaines">Domaines</a></li>
+        <li><a href="#galerie" data-i18n="nav_galerie">Galerie</a></li>
+        <li><a href="#don" data-i18n="nav_don">Faire un don</a></li>
+        <li><a href="#contact" data-i18n="nav_contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-right">
+      <div class="lang-toggle">
+        <button id="lang-fr" class="active" onclick="setLang('fr')">FR</button>
+        <button id="lang-en" onclick="setLang('en')">EN</button>
+      </div>
+      <a href="#don" class="nav-cta" data-i18n="nav_cta">Nous soutenir</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-inner">
+    <span class="eyebrow" data-i18n="hero_eyebrow">Organisation béninoise · Développement rural durable</span>
+    <h1 data-i18n-html="hero_title">Semer aujourd'hui,<br><em>nourrir</em> demain.</h1>
+    <p class="lead" data-i18n="hero_lead">SU TII YARA ONG accompagne les communautés rurales de N'Dali vers une agriculture durable, inclusive et résiliente — un pas à la fois, une coopérative à la fois.</p>
+    <div class="cta-row">
+      <a href="#don" class="btn btn-primary" data-i18n="hero_cta1">Faire un don</a>
+      <a href="#membres" class="btn btn-outline" data-i18n="hero_cta2">Espace membre</a>
+    </div>
+  </div>
+</section>
+
+<div class="hero-illustration">
+  <svg viewBox="0 0 920 220" preserveAspectRatio="none" role="img" aria-label="Illustration de champs et soleil levant">
+    <circle cx="460" cy="150" r="70" fill="#E4C77A" opacity="0.55"/>
+    <path d="M0,180 C150,120 250,200 400,150 C550,100 650,190 920,140 L920,220 L0,220 Z" fill="#1B3A2B"/>
+    <path d="M0,200 C180,160 300,210 460,175 C620,140 760,205 920,170 L920,220 L0,220 Z" fill="#122A1F"/>
+  </svg>
+</div>
+
+<div class="stats">
+  <div class="stats-grid">
+    <div><div class="stat-num">500+</div><div class="stat-label" data-i18n="stat1">Producteurs sensibilisés</div></div>
+    <div><div class="stat-num">120+</div><div class="stat-label" data-i18n="stat2">Femmes autonomisées</div></div>
+    <div><div class="stat-num">15</div><div class="stat-label" data-i18n="stat3">Coopératives accompagnées</div></div>
+    <div><div class="stat-num">5</div><div class="stat-label" data-i18n="stat4">Domaines d'intervention</div></div>
+  </div>
+</div>
+
+<section id="mission">
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="mission_eyebrow">Qui sommes-nous</span>
+    <h2 data-i18n="mission_title">Une organisation ancrée dans la terre de N'Dali</h2>
+  </div>
+  <div class="two-col">
+    <div>
+      <div class="story-block reveal">
+        <h3 data-i18n="identity_title">Notre identité</h3>
+        <p data-i18n="identity_text">SU TII YARA ONG est une organisation béninoise engagée pour le développement rural durable, la sécurité alimentaire, l'autonomisation des communautés et la protection de l'environnement dans la région de N'Dali.</p>
+      </div>
+      <div class="story-block reveal">
+        <h3 data-i18n="mission2_title">Notre mission</h3>
+        <p data-i18n="mission2_text">Contribuer à l'amélioration durable des conditions de vie des populations rurales à travers des actions innovantes, participatives et inclusives.</p>
+      </div>
+    </div>
+    <div class="timeline reveal">
+      <div class="tl-item">
+        <div class="tl-year">2021</div>
+        <p data-i18n="tl1">Fondation de SU TII YARA ONG à N'Dali, autour d'un noyau de producteurs volontaires.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2023</div>
+        <p data-i18n="tl2">Lancement des premières séances de sensibilisation et formations à la gestion agricole.</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2025</div>
+        <p data-i18n="tl3">Signature du protocole de partenariat avec Bénin Micro Finance (BMF).</p>
+      </div>
+      <div class="tl-item">
+        <div class="tl-year">2026</div>
+        <p data-i18n="tl4">Extension du programme d'inclusion sociale aux femmes et aux jeunes de la région.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="domaines" style="background:#fff; border-top:1px solid var(--line); border-bottom:1px solid var(--line);">
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="pillars_eyebrow">Ce que nous faisons</span>
+    <h2 data-i18n="pillars_title">Nos domaines d'intervention</h2>
+    <p data-i18n="pillars_sub">Cinq axes complémentaires, pensés pour transformer durablement les conditions de vie rurales.</p>
+  </div>
+  <div class="pillars reveal-stagger">
+    <div class="pillar-card">
+      <div class="pillar-icon">🌱</div>
+      <h4 data-i18n="p1_title">Agriculture durable</h4>
+      <p data-i18n="p1_text">Accompagnement des producteurs dans l'adoption de bonnes pratiques agricoles et la gestion durable des terres.</p>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-icon">💰</div>
+      <h4 data-i18n="p2_title">Accès aux services financiers</h4>
+      <p data-i18n="p2_text">Facilitation de l'accès à la microfinance pour renforcer l'entrepreneuriat agricole.</p>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-icon">👥</div>
+      <h4 data-i18n="p3_title">Renforcement des capacités</h4>
+      <p data-i18n="p3_text">Formations, conseils et appui technique aux producteurs et organisations paysannes.</p>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-icon">🌿</div>
+      <h4 data-i18n="p4_title">Environnement et climat</h4>
+      <p data-i18n="p4_text">Promotion des pratiques écologiques et adaptation au changement climatique.</p>
+    </div>
+    <div class="pillar-card">
+      <div class="pillar-icon">⚥</div>
+      <h4 data-i18n="p5_title">Inclusion sociale</h4>
+      <p data-i18n="p5_text">Autonomisation des femmes et des jeunes pour un développement équitable et durable.</p>
+    </div>
+  </div>
+</section>
+
+<section id="galerie">
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="gallery_eyebrow">Sur le terrain</span>
+    <h2 data-i18n="gallery_title">Nos actions en images</h2>
+  </div>
+  <div class="gallery-grid reveal-stagger">
+    <div class="gallery-item tall g1"><span data-i18n="g1">Séance de sensibilisation</span></div>
+    <div class="gallery-item g2"><span data-i18n="g2">Formation agricole</span></div>
+    <div class="gallery-item g3"><span data-i18n="g3">Signature BMF</span></div>
+    <div class="gallery-item g4"><span data-i18n="g4">Terrain communautaire</span></div>
+    <div class="gallery-item tall g5"><span data-i18n="g5">Producteurs mobilisés</span></div>
+    <div class="gallery-item g6"><span data-i18n="g6">Récolte</span></div>
+  </div>
+  <p class="gallery-note reveal" data-i18n="gallery_note">Visuels génériques temporaires — vos vraies photos remplaceront ces blocs dès qu'elles seront transmises.</p>
+</section>
+
+<section class="values-section" id="valeurs">
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="values_eyebrow">Ce qui nous guide</span>
+    <h2 data-i18n="values_title">Nos valeurs</h2>
+  </div>
+  <div class="values-grid reveal-stagger">
+    <div class="value-item"><span class="mark">◆</span><span class="label" data-i18n="v1">Engagement</span></div>
+    <div class="value-item"><span class="mark">◆</span><span class="label" data-i18n="v2">Équité et inclusion</span></div>
+    <div class="value-item"><span class="mark">◆</span><span class="label" data-i18n="v3">Solidarité</span></div>
+    <div class="value-item"><span class="mark">◆</span><span class="label" data-i18n="v4">Durabilité</span></div>
+    <div class="value-item"><span class="mark">◆</span><span class="label" data-i18n="v5">Intégrité</span></div>
+    <div class="value-item"><span class="mark">◆</span><span class="label" data-i18n="v6">Participation</span></div>
+  </div>
+</section>
+
+<section>
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="testi_eyebrow">Paroles du terrain</span>
+    <h2 data-i18n="testi_title">Ce qu'ils en disent</h2>
+    <p style="font-size:0.8rem; color:#8a8a7c;" data-i18n="testi_note">Exemples illustratifs — à remplacer par de vrais témoignages.</p>
+  </div>
+  <div class="testimonial-wrap reveal">
+    <div class="testimonial active">
+      <blockquote data-i18n="t1_quote">« Grâce aux formations, je gère aujourd'hui ma parcelle avec des techniques qui préservent le sol pour mes enfants. »</blockquote>
+      <div class="testimonial-author">
+        <div class="avatar">A.</div>
+        <div class="who"><strong data-i18n="t1_name">Amina, productrice</strong><span data-i18n="t1_loc">Coopérative de N'Dali</span></div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <blockquote data-i18n="t2_quote">« Le lien avec Bénin Micro Finance m'a permis d'investir dans du matériel que je n'aurais jamais pu acheter seul. »</blockquote>
+      <div class="testimonial-author">
+        <div class="avatar">M.</div>
+        <div class="who"><strong data-i18n="t2_name">Moussa, agriculteur</strong><span data-i18n="t2_loc">Route de Nikki</span></div>
+      </div>
+    </div>
+    <div class="testimonial">
+      <blockquote data-i18n="t3_quote">« Je n'aurais jamais pensé prendre la parole dans mon groupement avant de rejoindre ce programme. »</blockquote>
+      <div class="testimonial-author">
+        <div class="avatar">F.</div>
+        <div class="who"><strong data-i18n="t3_name">Fatouma, bénéficiaire</strong><span data-i18n="t3_loc">Quartier Wobakarou</span></div>
+      </div>
+    </div>
+    <div class="testi-dots">
+      <button class="active" onclick="showTesti(0)"></button>
+      <button onclick="showTesti(1)"></button>
+      <button onclick="showTesti(2)"></button>
+    </div>
+  </div>
+</section>
+
+<section style="background:var(--cream);">
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="partner_eyebrow">Ensemble, cultivons le changement</span>
+    <h2 data-i18n="partner_title">Un partenariat de confiance</h2>
+  </div>
+  <div class="partner reveal">
+    <div class="partner-badge">BMF</div>
+    <div class="partner-text">
+      <h3 data-i18n="partner_h3">Protocole de partenariat avec Bénin Micro Finance</h3>
+      <p data-i18n="partner_p">Ce partenariat renforce l'accès des producteurs à des solutions de microcrédit adaptées, au service d'une agriculture durable, inclusive et résiliente.</p>
+    </div>
+  </div>
+</section>
+
+<section id="don" class="donate-section">
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="donate_eyebrow">Votre soutien compte</span>
+    <h2 data-i18n="donate_title">Faire un don</h2>
+    <p data-i18n="donate_sub">Choisissez un montant, nous vous mettons en relation via WhatsApp pour finaliser votre don (Mobile Money ou virement).</p>
+  </div>
+  <div class="donate-box reveal">
+    <div class="amount-row" id="amount-row">
+      <button class="amount-btn" data-amount="5000">5 000 F</button>
+      <button class="amount-btn" data-amount="15000">15 000 F</button>
+      <button class="amount-btn" data-amount="50000">50 000 F</button>
+      <button class="amount-btn" data-amount="autre" data-i18n="donate_other">Autre</button>
+    </div>
+    <div class="field">
+      <label data-i18n="donate_name">Votre nom</label>
+      <input type="text" id="donor-name" placeholder="Ex : Fayçal">
+    </div>
+    <div class="field">
+      <label data-i18n="donate_contact">Téléphone ou email</label>
+      <input type="text" id="donor-contact" placeholder="Ex : 01 XX XX XX XX">
+    </div>
+    <button class="btn btn-gold" style="width:100%;" onclick="sendDonation()" data-i18n="donate_submit">Continuer sur WhatsApp</button>
+  </div>
+</section>
+
+<section id="carte" style="padding-top:80px;">
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="map_eyebrow">Où nous trouver</span>
+    <h2 data-i18n="map_title">Quartier Wobakarou, Route de Nikki, N'Dali</h2>
+  </div>
+  <div class="map-wrap reveal">
+    <iframe loading="lazy" src="https://www.google.com/maps?q=N'Dali,+Bénin&output=embed" allowfullscreen></iframe>
+  </div>
+</section>
+
+<section id="membres" class="members">
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="members_eyebrow">Espace membre</span>
+    <h2 data-i18n="members_title">Un espace pensé pour chaque acteur du réseau</h2>
+    <p data-i18n="members_sub">Trois profils distincts — bientôt disponibles — pour connecter producteurs, équipe terrain et partenaires institutionnels.</p>
+  </div>
+  <div class="member-cards reveal-stagger">
+    <div class="member-card">
+      <span class="eyebrow" data-i18n="m1_eyebrow">Profil producteur</span>
+      <h4 data-i18n="m1_title">Producteurs &amp; bénéficiaires</h4>
+      <p data-i18n="m1_text">Fiches techniques, guides de formation et demandes d'appui ou de microcrédit.</p>
+    </div>
+    <div class="member-card">
+      <span class="eyebrow" data-i18n="m2_eyebrow">Profil équipe</span>
+      <h4 data-i18n="m2_title">Équipe de l'ONG &amp; bénévoles</h4>
+      <p data-i18n="m2_text">Rapports de terrain, documents officiels et annuaire des membres.</p>
+    </div>
+    <div class="member-card">
+      <span class="eyebrow" data-i18n="m3_eyebrow">Profil partenaire</span>
+      <h4 data-i18n="m3_title">Partenaires &amp; bailleurs</h4>
+      <p data-i18n="m3_text">Accès sécurisé aux rapports financiers audités et bilans d'impact.</p>
+    </div>
+  </div>
+</section>
+
+<section id="contact" style="background:#fff; border-top:1px solid var(--line);">
+  <div class="section-head reveal">
+    <span class="eyebrow" data-i18n="contact_eyebrow">Restons en contact</span>
+    <h2 data-i18n="contact_title">Écrivez-nous</h2>
+  </div>
+  <div class="contact-grid reveal">
+    <form class="contact-form" onsubmit="sendContact(event)">
+      <div class="field">
+        <label data-i18n="cf_name">Nom complet</label>
+        <input type="text" id="cf-name" required>
+      </div>
+      <div class="field">
+        <label data-i18n="cf_email">Email</label>
+        <input type="email" id="cf-email" required>
+      </div>
+      <div class="field">
+        <label data-i18n="cf_subject">Sujet</label>
+        <select id="cf-subject">
+          <option data-i18n="cf_s1">Devenir partenaire</option>
+          <option data-i18n="cf_s2">Demande d'appui technique</option>
+          <option data-i18n="cf_s3">Presse / média</option>
+          <option data-i18n="cf_s4">Autre</option>
+        </select>
+      </div>
+      <div class="field">
+        <label data-i18n="cf_message">Message</label>
+        <textarea id="cf-message" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary" data-i18n="cf_submit">Envoyer le message</button>
+    </form>
+    <ul class="contact-info-list">
+      <li><div class="ic">📍</div><div><strong data-i18n="ci_addr_l">Adresse</strong><span data-i18n="ci_addr">Quartier Wobakarou, Route de Nikki, N'Dali — Bénin</span></div></li>
+      <li><div class="ic">📞</div><div><strong data-i18n="ci_tel_l">Téléphone</strong><span>40 74 24 46</span></div></li>
+      <li><div class="ic">💬</div><div><strong>WhatsApp</strong><span>01 97 95 12 12</span></div></li>
+      <li><div class="ic">✉️</div><div><strong data-i18n="ci_mail_l">Email</strong><span>ongsutiiyara@gmail.com</span></div></li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-grid">
+    <div>
+      <h4>SU TII YARA ONG</h4>
+      <p data-i18n="foot_addr">Quartier Wobakarou, Route de Nikki<br>N'Dali — Bénin</p>
+      <p style="margin-top:18px; color:rgba(250,246,238,0.5); font-style:italic;" data-i18n="foot_quote">« Semer aujourd'hui, nourrir demain »</p>
+    </div>
+    <div>
+      <h4 data-i18n="foot_contact">Contact</h4>
+      <a href="tel:+22940742446">Tél. : 40 74 24 46</a>
+      <a href="https://wa.me/22997951212">WhatsApp : 01 97 95 12 12</a>
+      <a href="mailto:ongsutiiyara@gmail.com">ongsutiiyara@gmail.com</a>
+    </div>
+    <div>
+      <h4 data-i18n="foot_follow">Suivez-nous</h4>
+      <a href="#">Facebook — SU TII YARA ONG</a>
+    </div>
+  </div>
+  <div class="foot-bottom">
+    <span data-i18n="foot_rights">© 2026 SU TII YARA ONG. Tous droits réservés.</span>
+    <span data-i18n="foot_slogan">Semer aujourd'hui, nourrir demain</span>
+  </div>
+</footer>
+
+<script>
+// ---------- scroll reveal ----------
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in-view'); io.unobserve(e.target); } });
+},{threshold:0.15});
+document.querySelectorAll('.reveal, .reveal-stagger').forEach(el=>io.observe(el));
+
+// ---------- growth rail ----------
+function updateGrowth(){
+  const h = document.documentElement.scrollHeight - window.innerHeight;
+  const pct = h>0 ? Math.min(100,(window.scrollY/h)*100) : 0;
+  document.getElementById('growth-fill').style.height = pct+'%';
+}
+window.addEventListener('scroll', updateGrowth);
+updateGrowth();
+
+// ---------- testimonials ----------
+const testis = document.querySelectorAll('.testimonial');
+const dots = document.querySelectorAll('.testi-dots button');
+let testiIdx = 0;
+function showTesti(i){
+  testis.forEach(t=>t.classList.remove('active'));
+  dots.forEach(d=>d.classList.remove('active'));
+  testis[i].classList.add('active');
+  dots[i].classList.add('active');
+  testiIdx = i;
+}
+setInterval(()=>{ showTesti((testiIdx+1)%testis.length); }, 6000);
+
+// ---------- donation amount ----------
+let selectedAmount = null;
+document.querySelectorAll('.amount-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.amount-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    selectedAmount = btn.dataset.amount;
+  });
+});
+function sendDonation(){
+  const name = document.getElementById('donor-name').value || '(non renseigné)';
+  const contact = document.getElementById('donor-contact').value || '(non renseigné)';
+  const amount = selectedAmount || '(à préciser)';
+  const msg = `Bonjour SU TII YARA ONG, je souhaite faire un don.\nNom : ${name}\nContact : ${contact}\nMontant : ${amount} F CFA`;
+  window.open('https://wa.me/22997951212?text='+encodeURIComponent(msg), '_blank');
+}
+
+// ---------- contact form ----------
+function sendContact(e){
+  e.preventDefault();
+  const name = document.getElementById('cf-name').value;
+  const email = document.getElementById('cf-email').value;
+  const subject = document.getElementById('cf-subject').value;
+  const message = document.getElementById('cf-message').value;
+  const body = `Nom : ${name}\nEmail : ${email}\nSujet : ${subject}\n\n${message}`;
+  window.location.href = `mailto:ongsutiiyara@gmail.com?subject=${encodeURIComponent('[Site] '+subject)}&body=${encodeURIComponent(body)}`;
+}
+
+// ---------- i18n ----------
+const translations = {
+  nav_mission:{en:"Mission"}, nav_domaines:{en:"Focus areas"}, nav_galerie:{en:"Gallery"}, nav_don:{en:"Donate"}, nav_contact:{en:"Contact"}, nav_cta:{en:"Support us"},
+  hero_eyebrow:{en:"Beninese organization · Sustainable rural development"},
+  hero_lead:{en:"SU TII YARA ONG supports rural communities in N'Dali toward sustainable, inclusive and resilient agriculture — one step, one cooperative at a time."},
+  hero_cta1:{en:"Donate"}, hero_cta2:{en:"Member area"},
+  stat1:{en:"Farmers sensitized"}, stat2:{en:"Women empowered"}, stat3:{en:"Cooperatives supported"}, stat4:{en:"Focus areas"},
+  mission_eyebrow:{en:"Who we are"}, mission_title:{en:"An organization rooted in N'Dali"},
+  identity_title:{en:"Our identity"}, identity_text:{en:"SU TII YARA ONG is a Beninese organization committed to sustainable rural development, food security, community empowerment and environmental protection in the N'Dali region."},
+  mission2_title:{en:"Our mission"}, mission2_text:{en:"To sustainably improve the living conditions of rural populations through innovative, participatory and inclusive action."},
+  tl1:{en:"SU TII YARA ONG founded in N'Dali by a core group of volunteer producers."},
+  tl2:{en:"First awareness sessions and farm management training launched."},
+  tl3:{en:"Partnership agreement signed with Bénin Micro Finance (BMF)."},
+  tl4:{en:"Social inclusion program extended to women and youth in the region."},
+  pillars_eyebrow:{en:"What we do"}, pillars_title:{en:"Our focus areas"}, pillars_sub:{en:"Five complementary areas designed to durably transform rural livelihoods."},
+  p1_title:{en:"Sustainable agriculture"}, p1_text:{en:"Supporting producers in adopting good farming practices and sustainable land management."},
+  p2_title:{en:"Access to financial services"}, p2_text:{en:"Facilitating access to microfinance to strengthen agricultural entrepreneurship."},
+  p3_title:{en:"Capacity building"}, p3_text:{en:"Training, advice and technical support for producers and farmer organizations."},
+  p4_title:{en:"Environment and climate"}, p4_text:{en:"Promoting ecological practices and climate change adaptation."},
+  p5_title:{en:"Social inclusion"}, p5_text:{en:"Empowering women and youth for equitable, sustainable development."},
+  gallery_eyebrow:{en:"On the ground"}, gallery_title:{en:"Our work in pictures"},
+  gallery_note:{en:"Temporary generic visuals — your real photos will replace these blocks once shared."},
+  g1:{en:"Awareness session"}, g2:{en:"Farm training"}, g3:{en:"BMF signing"}, g4:{en:"Community field"}, g5:{en:"Producers mobilized"}, g6:{en:"Harvest"},
+  values_eyebrow:{en:"What guides us"}, values_title:{en:"Our values"},
+  v1:{en:"Commitment"}, v2:{en:"Equity & inclusion"}, v3:{en:"Solidarity"}, v4:{en:"Sustainability"}, v5:{en:"Integrity"}, v6:{en:"Participation"},
+  testi_eyebrow:{en:"Voices from the field"}, testi_title:{en:"What they say"}, testi_note:{en:"Illustrative examples — to be replaced with real testimonials."},
+  t1_quote:{en:"\u201cThanks to the training, I now manage my plot with techniques that protect the soil for my children.\u201d"}, t1_name:{en:"Amina, farmer"}, t1_loc:{en:"N'Dali cooperative"},
+  t2_quote:{en:"\u201cThe link with Bénin Micro Finance let me invest in equipment I could never have afforded alone.\u201d"}, t2_name:{en:"Moussa, farmer"}, t2_loc:{en:"Nikki road"},
+  t3_quote:{en:"\u201cI never thought I'd speak up in my group before joining this program.\u201d"}, t3_name:{en:"Fatouma, beneficiary"}, t3_loc:{en:"Wobakarou district"},
+  partner_eyebrow:{en:"Together, let's grow change"}, partner_title:{en:"A trusted partnership"},
+  partner_h3:{en:"Partnership agreement with Bénin Micro Finance"}, partner_p:{en:"This partnership strengthens producers' access to tailored microcredit solutions, in support of sustainable, inclusive and resilient agriculture."},
+  donate_eyebrow:{en:"Your support matters"}, donate_title:{en:"Make a donation"}, donate_sub:{en:"Choose an amount — we'll connect with you on WhatsApp to complete your donation (Mobile Money or bank transfer)."},
+  donate_other:{en:"Other"}, donate_name:{en:"Your name"}, donate_contact:{en:"Phone or email"}, donate_submit:{en:"Continue on WhatsApp"},
+  map_eyebrow:{en:"Find us"}, map_title:{en:"Wobakarou district, Nikki road, N'Dali"},
+  members_eyebrow:{en:"Member area"}, members_title:{en:"A space built for every actor in the network"}, members_sub:{en:"Three distinct profiles — coming soon — connecting producers, field staff and institutional partners."},
+  m1_eyebrow:{en:"Producer profile"}, m1_title:{en:"Producers & beneficiaries"}, m1_text:{en:"Technical sheets, training guides and requests for support or microcredit."},
+  m2_eyebrow:{en:"Staff profile"}, m2_title:{en:"NGO team & volunteers"}, m2_text:{en:"Field reports, official documents and a member directory."},
+  m3_eyebrow:{en:"Partner profile"}, m3_title:{en:"Partners & donors"}, m3_text:{en:"Secure access to audited financial reports and impact reviews."},
+  contact_eyebrow:{en:"Get in touch"}, contact_title:{en:"Write to us"},
+  cf_name:{en:"Full name"}, cf_email:{en:"Email"}, cf_subject:{en:"Subject"}, cf_message:{en:"Message"}, cf_submit:{en:"Send message"},
+  cf_s1:{en:"Become a partner"}, cf_s2:{en:"Technical support request"}, cf_s3:{en:"Press / media"}, cf_s4:{en:"Other"},
+  ci_addr_l:{en:"Address"}, ci_addr:{en:"Wobakarou district, Nikki road, N'Dali — Benin"}, ci_tel_l:{en:"Phone"}, ci_mail_l:{en:"Email"},
+  foot_addr:{en:"Wobakarou district, Nikki road<br>N'Dali — Benin"}, foot_quote:{en:"\u201cSow today, feed tomorrow\u201d"},
+  foot_contact:{en:"Contact"}, foot_follow:{en:"Follow us"}, foot_rights:{en:"© 2026 SU TII YARA ONG. All rights reserved."}, foot_slogan:{en:"Sow today, feed tomorrow"}
+};
+const frOriginal = {};
+function setLang(lang){
+  document.getElementById('lang-fr').classList.toggle('active', lang==='fr');
+  document.getElementById('lang-en').classList.toggle('active', lang==='en');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    const key = el.getAttribute('data-i18n');
+    if(!frOriginal[key]) frOriginal[key] = el.textContent;
+    if(lang==='en' && translations[key] && translations[key].en){ el.textContent = translations[key].en; }
+    else { el.textContent = frOriginal[key]; }
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el=>{
+    const key = el.getAttribute('data-i18n-html');
+    if(!frOriginal[key]) frOriginal[key] = el.innerHTML;
+    if(lang==='en' && key==='hero_title'){ el.innerHTML = "Sow today,<br><em>feed</em> tomorrow."; }
+    else { el.innerHTML = frOriginal[key]; }
+  });
+}
+</script>
+</body>
+</html>
